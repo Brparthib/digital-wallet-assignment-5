@@ -1,7 +1,9 @@
+/* eslint-disable no-console */
 import { Server } from "http";
 import mongoose from "mongoose";
 import { envVars } from "./app/configs/envCon";
 import app from "./app";
+import { seedAdmin } from "./app/utils/seedAdmin";
 
 let server: Server;
 
@@ -18,4 +20,46 @@ const startServer = async () => {
   }
 };
 
-startServer();
+(async () => {
+  startServer();
+  seedAdmin();
+})();
+
+// unhandled rejection error handler
+process.on("unhandledRejection", (err) => {
+  console.log("unhandled rejection detected... server shutting down... ", err);
+
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});
+
+// uncaught exception error handler
+process.on("uncaughtException", (err) => {
+  console.log("uncaught exception detected... server shutting down... ", err);
+
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});
+
+// signal termination handler
+process.on("SIGTERM", () => {
+  console.log("SIGTERM signal received... server shutting down... ");
+
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});

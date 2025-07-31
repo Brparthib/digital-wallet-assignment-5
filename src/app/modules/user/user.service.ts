@@ -1,4 +1,6 @@
+import httpStatus from 'http-status-codes';
 import { envVars } from "../../configs/envCon";
+import AppError from "../../errorHelpers/AppError";
 import { IAuthProvider, IUser } from "./user.interface";
 import { User } from "./user.model";
 import bcrypt from "bcryptjs";
@@ -8,7 +10,7 @@ const createUser = async (payload: Partial<IUser>) => {
 
   const isUserExists = await User.findOne({ email });
   if (isUserExists) {
-    throw new Error("User Already Exists!!");
+    throw new AppError(httpStatus.BAD_REQUEST, "User Already Exists!!");
   }
 
   const hashedPassword = await bcrypt.hash(
@@ -34,7 +36,7 @@ const createUser = async (payload: Partial<IUser>) => {
 const getAllUsers = async () => {
   const users = await User.find();
   if (!users) {
-    throw new Error("Users Not Found!!");
+    throw new AppError(httpStatus.NOT_FOUND, "Users Not Found!!");
   }
 
   const totalUser = await User.countDocuments();
@@ -66,7 +68,7 @@ const updateUser = async (userId: string, payload: Partial<IUser>) => {
 const deleteUser = async (userId: string) => {
   const isUserExists = await User.findById(userId);
   if (!isUserExists) {
-    throw new Error("User Does Not Exists!!");
+    throw new AppError(httpStatus.BAD_REQUEST, "User Does Not Exists!!");
   }
 
   const deletedUser = await User.findByIdAndUpdate(
