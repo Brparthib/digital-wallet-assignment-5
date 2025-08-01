@@ -12,7 +12,7 @@ app.use(cors());
 app.use("/api/v1", router);
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Welcome to digital-wallet-server");
+  res.status(200).send("Welcome to digital-wallet-server");
 });
 
 app.use(globalErrorHandler);

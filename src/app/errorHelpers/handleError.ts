@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from "mongoose";
 import { TErrorSources, TGenericResponse } from "../interfaces/error.type";
-import { ZodError } from "zod";
 
 export const handleDuplicateError = (err: any): TGenericResponse => {
   const matchedArray = err.message.match(/"([^"]*)"/);
@@ -10,7 +9,7 @@ export const handleDuplicateError = (err: any): TGenericResponse => {
     statusCode: 400,
     message: `${matchedArray[1]} already exists!!`,
   };
-};
+}; 
 
 export const handleCastError = (err: mongoose.Error.CastError): TGenericResponse => {
   return {
@@ -38,7 +37,7 @@ export const handleValidationError = (
   };
 };
 
-export const handleZodError = (err: ZodError): TGenericResponse => {
+export const handleZodError = (err: any): TGenericResponse => {
   const errorSources: TErrorSources[] = [];
   const issues = Object.values(err.issues);
   issues.forEach((issue: any) => {

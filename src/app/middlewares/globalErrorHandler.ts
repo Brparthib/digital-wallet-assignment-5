@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { envVars } from "../configs/envCon";
 import { TErrorSources } from "../interfaces/error.type";
 import {
@@ -15,6 +15,7 @@ export const globalErrorHandler = (
   err: any,
   req: Request,
   res: Response,
+  next: NextFunction
 ) => {
   if (envVars.NODE_ENV === "development") {
     console.log(err);
