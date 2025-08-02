@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { IAuthProvider, IUser, Role } from "./user.interface";
+import { Approval, IAuthProvider, IUser, Role } from "./user.interface";
 
 const authProviderSchema = new Schema<IAuthProvider>(
   {
@@ -24,6 +24,11 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: Object.values(Role),
       default: Role.USER,
+    },
+    approval: {
+      type: String,
+      enum: Object.values(Approval),
+      default: Approval.SUSPEND,
     },
     isVerified: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
