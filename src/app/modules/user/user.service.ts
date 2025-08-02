@@ -1,4 +1,4 @@
-import httpStatus from 'http-status-codes';
+import httpStatus from "http-status-codes";
 import { envVars } from "../../configs/envCon";
 import AppError from "../../errorHelpers/AppError";
 import { IAuthProvider, IUser } from "./user.interface";
@@ -6,9 +6,9 @@ import { User } from "./user.model";
 import bcrypt from "bcryptjs";
 
 const createUser = async (payload: Partial<IUser>) => {
-  const { email, password, ...rest } = payload;
+  const { phone, password, ...rest } = payload;
 
-  const isUserExists = await User.findOne({ email });
+  const isUserExists = await User.findOne({ phone });
   if (isUserExists) {
     throw new AppError(httpStatus.BAD_REQUEST, "User Already Exists!!");
   }
@@ -20,11 +20,11 @@ const createUser = async (payload: Partial<IUser>) => {
 
   const authProvider: IAuthProvider = {
     provider: "credentials",
-    providerId: email as string,
+    providerId: phone as string,
   };
 
   const user = await User.create({
-    email,
+    phone,
     password: hashedPassword,
     auths: [authProvider],
     ...rest,

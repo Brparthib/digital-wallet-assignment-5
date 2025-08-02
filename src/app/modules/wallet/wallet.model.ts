@@ -8,11 +8,16 @@ const walletSchema = new Schema<IWallet>(
       ref: "User",
       required: true,
     },
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     balance: {
       type: Number,
       required: true,
     },
-    currency: { type: String, required: true },
+    currency: { type: String, default: "BDT" },
     status: {
       type: String,
       enum: Object.values(Wallet_Status),

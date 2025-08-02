@@ -4,6 +4,11 @@ export enum Role {
   USER = "USER",
 }
 
+export enum Approval {
+  APPROVE = "APPROVED",
+  SUSPEND = "SUSPEND",
+}
+
 export enum User_Status {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
@@ -16,13 +21,15 @@ export interface IAuthProvider {
 }
 
 export interface IUser {
+  _id?: string;
   name: string;
-  email: string;
+  phone: string;
   password?: string;
-  phone?: string;
+  email?: string;
   picture?: string;
   address?: string;
   role: Role;
+  approval: Approval;
   isVerified?: boolean;
   isDeleted?: boolean;
   status?: User_Status;
