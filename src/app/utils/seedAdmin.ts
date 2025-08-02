@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 export const seedAdmin = async () => {
   try {
     const isAdminExists = await User.findOne({
-      email: envVars.ADMIN_EMAIL,
+      phone: envVars.ADMIN_PHONE,
     });
     if (isAdminExists) {
       console.log("Admin Already Exists!!");
@@ -24,12 +24,12 @@ export const seedAdmin = async () => {
 
     const authProvider: IAuthProvider = {
       provider: "credentials",
-      providerId: envVars.ADMIN_EMAIL,
+      providerId: envVars.ADMIN_PHONE,
     };
 
     const payload: IUser = {
       name: "Admin",
-      email: envVars.ADMIN_EMAIL,
+      phone: envVars.ADMIN_PHONE,
       role: Role.ADMIN,
       password: hashedPassword,
       isVerified: true,

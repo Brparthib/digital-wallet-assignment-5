@@ -15,17 +15,17 @@ export enum User_Status {
   BLOCKED = "BLOCKED",
 }
 
-
 export interface IAuthProvider {
   provider: "google" | "credentials";
   providerId: string;
 }
 
 export interface IUser {
+  _id?: string;
   name: string;
-  email: string;
+  phone: string;
   password?: string;
-  phone?: string;
+  email?: string;
   picture?: string;
   address?: string;
   role: Role;

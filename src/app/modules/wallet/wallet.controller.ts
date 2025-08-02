@@ -44,6 +44,8 @@ const updateBalance = catchAsync(async (req: Request, res: Response) => {
   const { amount } = req.body;
   const wallet = await walletServices.updateBalance(userId, amount);
 
+  
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
