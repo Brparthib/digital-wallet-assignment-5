@@ -4,18 +4,6 @@ import { catchAsync } from "../../utils/catchAsync";
 import { walletServices } from "./wallet.service";
 import { sendResponse } from "../../utils/sendResponse";
 
-// const createWallet = catchAsync(async (req: Request, res: Response) => {
-//   const { userId } = req.body;
-//   const wallet = await walletServices.createWallet(userId);
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.CREATED,
-//     success: true,
-//     message: "Wallet Created Successfully",
-//     data: wallet,
-//   });
-// });
-
 const getAllWallets = catchAsync(async (req: Request, res: Response) => {
   const wallets = await walletServices.getAllWallets();
 

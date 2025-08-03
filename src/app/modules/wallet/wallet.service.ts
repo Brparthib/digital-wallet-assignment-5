@@ -14,19 +14,6 @@ import {
 } from "../transaction/transaction.interface";
 import { Approval, Role } from "../user/user.interface";
 
-// const createWallet = async (userId: string) => {
-//   const min_amount = 50;
-
-//   const wallet = await Wallet.create({
-//     userId,
-//     balance: min_amount,
-//     status: Wallet_Status.ACTIVE,
-//     currency: "BDT",
-//   });
-
-//   return wallet;
-// };
-
 const getAllWallets = async () => {
   const wallets = await Wallet.find({});
   if (!wallets) {
@@ -114,7 +101,7 @@ const sendMoney = async (
 
   const sendAmount = amount - fee;
 
-  senderWallet.balance -= sendAmount;
+  senderWallet.balance -= amount;
   receiverWallet.balance += sendAmount;
 
   senderWallet.save();
@@ -247,7 +234,7 @@ const cashOut = async (
 
   const sendAmount = amount - fee;
 
-  senderWallet.balance -= sendAmount;
+  senderWallet.balance -= amount;
   receiverWallet.balance += sendAmount;
 
   senderWallet.save();
