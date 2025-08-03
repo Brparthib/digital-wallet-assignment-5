@@ -14,6 +14,8 @@ interface EnvConfig {
   JWT_REFRESH_SECRET: string;
   JWT_REFRESH_EXPIRES: string;
   MINIMUM_BALANCE: string;
+  CHARGE_LIMIT: string;
+  PERCENTAGE_LIMIT: string;
 }
 
 const loadEnvVars = (): EnvConfig => {
@@ -29,6 +31,8 @@ const loadEnvVars = (): EnvConfig => {
     "JWT_REFRESH_SECRET",
     "JWT_REFRESH_EXPIRES",
     "MINIMUM_BALANCE",
+    "CHARGE_LIMIT",
+    "PERCENTAGE_LIMIT",
   ];
 
   requiredEnvVars.forEach((key) => {
@@ -49,6 +53,8 @@ const loadEnvVars = (): EnvConfig => {
     JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET as string,
     JWT_REFRESH_EXPIRES: process.env.JWT_REFRESH_EXPIRES as string,
     MINIMUM_BALANCE: process.env.MINIMUM_BALANCE as string,
+    CHARGE_LIMIT: process.env.CHARGE_LIMIT as string,
+    PERCENTAGE_LIMIT: process.env.PERCENTAGE_LIMIT as string,
   };
 };
 

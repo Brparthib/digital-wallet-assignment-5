@@ -27,20 +27,20 @@ const transactionSchema = new Schema<ITransaction>(
       default: Transaction_Status.PENDING,
     },
     fromUser: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
     },
     toUser: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
     },
     commission: {
       type: Number,
+      default: 0,
     },
     fee: {
       type: Number,
+      default: 0,
     },
     note: {
       type: String,

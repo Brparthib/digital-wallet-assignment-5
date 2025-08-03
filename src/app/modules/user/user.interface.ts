@@ -5,7 +5,7 @@ export enum Role {
 }
 
 export enum Approval {
-  APPROVE = "APPROVED",
+  APPROVED = "APPROVED",
   SUSPEND = "SUSPEND",
 }
 
@@ -29,7 +29,7 @@ export interface IUser {
   picture?: string;
   address?: string;
   role: Role;
-  approval: Approval;
+  approval?: Approval;
   isVerified?: boolean;
   isDeleted?: boolean;
   status?: User_Status;

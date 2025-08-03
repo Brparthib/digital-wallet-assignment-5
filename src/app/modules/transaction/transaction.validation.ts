@@ -7,5 +7,6 @@ export const transactionZodSchema = z.object({
   status: z.string(),
   fromUser: z.string(),
   toUser: z.string(),
+  commission: z.string().optional(),
   note: z.string(),
 });

@@ -4,17 +4,17 @@ import { catchAsync } from "../../utils/catchAsync";
 import { walletServices } from "./wallet.service";
 import { sendResponse } from "../../utils/sendResponse";
 
-const createWallet = catchAsync(async (req: Request, res: Response) => {
-  const { userId } = req.body;
-  const wallet = await walletServices.createWallet(userId);
+// const createWallet = catchAsync(async (req: Request, res: Response) => {
+//   const { userId } = req.body;
+//   const wallet = await walletServices.createWallet(userId);
 
-  sendResponse(res, {
-    statusCode: httpStatus.CREATED,
-    success: true,
-    message: "Wallet Created Successfully",
-    data: wallet,
-  });
-});
+//   sendResponse(res, {
+//     statusCode: httpStatus.CREATED,
+//     success: true,
+//     message: "Wallet Created Successfully",
+//     data: wallet,
+//   });
+// });
 
 const getAllWallets = catchAsync(async (req: Request, res: Response) => {
   const wallets = await walletServices.getAllWallets();
@@ -28,8 +28,8 @@ const getAllWallets = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getAllWalletByUser = catchAsync(async (req: Request, res: Response) => {
-  const wallet = await walletServices.getAllWalletByUser(req.params.id);
+const getWalletByUser = catchAsync(async (req: Request, res: Response) => {
+  const wallet = await walletServices.getWalletByUser(req.params.id);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -39,42 +39,75 @@ const getAllWalletByUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const updateBalance = catchAsync(async (req: Request, res: Response) => {
+const updateWallet = catchAsync(async (req: Request, res: Response) => {
   const userId = req.params.id;
-  const { amount } = req.body;
-  const wallet = await walletServices.updateBalance(userId, amount);
-
-  
+  const wallet = await walletServices.updateWallet(userId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Wallet Updated Successfully",
+    message: `Wallet ${wallet.status} Successfully`,
     data: wallet,
   });
 });
 
-const toggleWalletStatus = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.params.id;
-  const { status } = req.body;
-  const wallet = await walletServices.toggleWalletStatus(
-    userId,
-    status.toUpperCase()
+const sendMoney = catchAsync(async (req: Request, res: Response) => {
+  const verifiedToken = req.user;
+  const { toPhone, amount, note } = req.body;
+  const transaction = await walletServices.sendMoney(
+    toPhone,
+    amount,
+    note,
+    verifiedToken
   );
-  console.log(status.toUpperCase());
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: `Wallet ${status} Successfully`,
-    data: wallet,
+    message: "Send Money Successful",
+    data: transaction,
+  });
+});
+
+const cashIn = catchAsync(async (req: Request, res: Response) => {
+  const verifiedToken = req.user;
+  const { toPhone, amount } = req.body;
+  const transaction = await walletServices.cashIn(
+    toPhone,
+    amount,
+    verifiedToken
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Cash In Successful",
+    data: transaction,
+  });
+});
+
+const cashOut = catchAsync(async (req: Request, res: Response) => {
+  const verifiedToken = req.user;
+  const { toPhone, amount } = req.body;
+  const transaction = await walletServices.cashOut(
+    toPhone,
+    amount,
+    verifiedToken
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Send Money Successful",
+    data: transaction,
   });
 });
 
 export const walletControllers = {
-  createWallet,
   getAllWallets,
-  getAllWalletByUser,
-  updateBalance,
-  toggleWalletStatus,
+  getWalletByUser,
+  updateWallet,
+  sendMoney,
+  cashIn,
+  cashOut,
 };
