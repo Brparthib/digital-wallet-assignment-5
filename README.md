@@ -1,4 +1,4 @@
-## 📚 Digital Wallet System
+## 💹 Digital Wallet System
 A secure and modular role-based backend API for a digital wallet system (like Bkash or Nagad) built with Express.js and Mongoose. It supports user registration, wallet management, and core financial operations including add money, withdraw, and send money.
 
 
