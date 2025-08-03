@@ -4,17 +4,6 @@ import { catchAsync } from "../../utils/catchAsync";
 import { transactionServices } from "./transaction.service";
 import { sendResponse } from "../../utils/sendResponse";
 
-const makeTransaction = catchAsync(async (req: Request, res: Response) => {
-  const transaction = await transactionServices.makeTransaction(req.body);
-
-  sendResponse(res, {
-    statusCode: httpStatus.CREATED,
-    success: true,
-    message: "Transaction Successful",
-    data: transaction,
-  });
-});
-
 const getAllTransactions = catchAsync(async (req: Request, res: Response) => {
   const transactions = await transactionServices.getAllTransactions();
 
@@ -27,9 +16,11 @@ const getAllTransactions = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getTransactionByUser = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.params.id;
-  const transactions = await transactionServices.getTransactionByUser(userId);
+const getTransactionsById = catchAsync(async (req: Request, res: Response) => {
+  const verifiedToken = req.user;
+  const transactions = await transactionServices.getTransactionsById(
+    verifiedToken
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -39,23 +30,8 @@ const getTransactionByUser = catchAsync(async (req: Request, res: Response) => {
     data: transactions.data,
   });
 });
-const getTransactionById = catchAsync(async (req: Request, res: Response) => {
-  const transactionId = req.params.id;
-  const transaction = await transactionServices.getTransactionById(
-    transactionId
-  );
-
-  sendResponse(res, {
-    statusCode: httpStatus.CREATED,
-    success: true,
-    message: "Transaction Retrieved Successfully",
-    data: transaction,
-  });
-});
 
 export const transactionControllers = {
-  makeTransaction,
   getAllTransactions,
-  getTransactionByUser,
-  getTransactionById,
+  getTransactionsById,
 };

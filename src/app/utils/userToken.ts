@@ -2,7 +2,7 @@ import { User_Status } from "./../modules/user/user.interface";
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../configs/envCon";
-import { Approval, IUser, Role } from "../modules/user/user.interface";
+import { IUser } from "../modules/user/user.interface";
 import { User } from "../modules/user/user.model";
 import { generateToken, verifyToken } from "./jwt";
 import AppError from "../errorHelpers/AppError";
@@ -11,10 +11,8 @@ export const createUserTokens = (user: Partial<IUser>) => {
   const jwtPayload = {
     userId: user._id,
     phone: user.phone,
-    role:
-      user.role === Role.AGENT && user.approval === Approval.APPROVE
-        ? Role.AGENT
-        : user.role,
+    role: user.role,
+    approval: user.approval,
   };
 
   const accessToken = generateToken(
@@ -65,11 +63,8 @@ export const createNewAccessToken = async (refreshToken: string) => {
   const jwtPayload = {
     userId: isUserExists._id,
     phone: isUserExists.phone,
-    role:
-      isUserExists.role === Role.AGENT &&
-      isUserExists.approval === Approval.APPROVE
-        ? Role.AGENT
-        : isUserExists.role,
+    role: isUserExists.role,
+    approval: isUserExists.approval,
   };
 
   const newAccessToken = generateToken(

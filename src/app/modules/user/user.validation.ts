@@ -66,8 +66,10 @@ export const updateUserZodSchema = z.object({
     .min(5, { message: "Email must be at least 5 characters long." })
     .max(100, { message: "Email cannot exceed 10 characters." })
     .optional(),
+  role: z.string({ error: "Role must be string" }).optional(),
   address: z
     .string({ error: "Address must be string." })
     .max(200, { message: "Address cannot exceed 200 characters." })
     .optional(),
+  approval: z.string().optional(),
 });

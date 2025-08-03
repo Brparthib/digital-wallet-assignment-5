@@ -21,7 +21,7 @@ const walletSchema = new Schema<IWallet>(
     status: {
       type: String,
       enum: Object.values(Wallet_Status),
-      default: Wallet_Status.ACTIVE,
+      default: Wallet_Status.UNBLOCKED,
     },
   },
   { timestamps: true, versionKey: false }

@@ -1,9 +1,11 @@
 import httpStatus from "http-status-codes";
 import { envVars } from "../../configs/envCon";
 import AppError from "../../errorHelpers/AppError";
-import { IAuthProvider, IUser } from "./user.interface";
+import { Approval, IAuthProvider, IUser, Role } from "./user.interface";
 import { User } from "./user.model";
 import bcrypt from "bcryptjs";
+import { Wallet } from "../wallet/wallet.model";
+import { JwtPayload } from "jsonwebtoken";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { phone, password, ...rest } = payload;
@@ -30,7 +32,13 @@ const createUser = async (payload: Partial<IUser>) => {
     ...rest,
   });
 
-  return user;
+  const wallet = await Wallet.create({
+    userId: user._id,
+    phone: phone,
+    balance: Number(envVars.MINIMUM_BALANCE),
+  });
+
+  return { user, wallet };
 };
 
 const getAllUsers = async () => {
@@ -49,7 +57,20 @@ const getAllUsers = async () => {
   };
 };
 
-const updateUser = async (userId: string, payload: Partial<IUser>) => {
+const getSingleUser = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Not Found!!");
+  }
+
+  return user;
+};
+
+const updateUser = async (
+  userId: string,
+  payload: Partial<IUser>,
+  decodedToken: JwtPayload
+) => {
   if (payload.password) {
     payload.password = await bcrypt.hash(
       payload.password as string,
@@ -57,12 +78,35 @@ const updateUser = async (userId: string, payload: Partial<IUser>) => {
     );
   }
 
+  if (payload.approval && decodedToken.role !== Role.ADMIN) {
+    throw new AppError(httpStatus.FORBIDDEN, "You are unauthorized!!");
+  }
+
+  if (payload.role === Role.ADMIN && decodedToken.role !== Role.ADMIN) {
+    throw new AppError(httpStatus.FORBIDDEN, "You are unauthorized!!");
+  }
+
+  let message = "";
+  if (payload.role === Role.AGENT && decodedToken.role !== Role.USER) {
+    message =
+      "You have claimed to be an agent. Please wait for admin approval. You can continue using the wallet until you're approved.";
+  }
+
+  if (
+    payload.role === Role.AGENT &&
+    decodedToken.role !== Role.AGENT &&
+    decodedToken.approval === Approval.SUSPEND
+  ) {
+    message =
+      "You have claimed to be an agent. Please wait for admin approval. You can continue using the wallet until you're approved.";
+  }
+
   const updatedUser = await User.findByIdAndUpdate(userId, payload, {
     new: true,
     runValidators: true,
   });
 
-  return updatedUser;
+  return { updatedUser, message };
 };
 
 const deleteUser = async (userId: string) => {
@@ -71,18 +115,17 @@ const deleteUser = async (userId: string) => {
     throw new AppError(httpStatus.BAD_REQUEST, "User Does Not Exists!!");
   }
 
-  const deletedUser = await User.findByIdAndUpdate(
-    userId,
-    { isDeleted: true },
-    { new: true }
-  );
+  await User.findByIdAndUpdate(userId, { isDeleted: true });
 
-  return deletedUser;
+  await Wallet.findByIdAndUpdate(userId, { isDeleted: true });
+
+  return null;
 };
 
 export const userServices = {
   createUser,
   getAllUsers,
+  getSingleUser,
   updateUser,
   deleteUser,
 };
