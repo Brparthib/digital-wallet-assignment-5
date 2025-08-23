@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { userServices } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import { JwtPayload } from "jsonwebtoken";
 
 const createUser = catchAsync(async (req: Request, res: Response) => {
   const result = await userServices.createUser(req.body);
@@ -27,8 +28,9 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getSingleUser = catchAsync(async (req: Request, res: Response) => {
-  const user = await userServices.getSingleUser(req.params.id);
+const getMyProfile = catchAsync(async (req: Request, res: Response) => {
+  const verifiedToken = req.user as JwtPayload;
+  const user = await userServices.getMyProfile(verifiedToken.userId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -41,7 +43,7 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
 const updateUser = catchAsync(async (req: Request, res: Response) => {
   const userId = req.params.id;
   const payload = req.body;
-  const verifiedToken = req.user;
+  const verifiedToken = req.user as JwtPayload;
   const result = await userServices.updateUser(userId, payload, verifiedToken);
 
   sendResponse(res, {
@@ -66,7 +68,7 @@ const deletedUser = catchAsync(async (req: Request, res: Response) => {
 export const userControllers = {
   createUser,
   getAllUsers,
-  getSingleUser,
+  getMyProfile,
   updateUser,
   deletedUser,
 };

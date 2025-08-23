@@ -22,10 +22,10 @@ const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     phone: { type: String, required: true, unique: true },
-    email: { type: String, },
     password: { type: String },
-    picture: { type: String },
+    email: { type: String },
     address: { type: String },
+    picture: { type: String },
     role: {
       type: String,
       enum: Object.values(Role),

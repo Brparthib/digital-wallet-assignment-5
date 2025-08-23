@@ -9,9 +9,11 @@ export const handleDuplicateError = (err: any): TGenericResponse => {
     statusCode: 400,
     message: `${matchedArray[1]} already exists!!`,
   };
-}; 
+};
 
-export const handleCastError = (err: mongoose.Error.CastError): TGenericResponse => {
+export const handleCastError = (
+  err: mongoose.Error.CastError
+): TGenericResponse => {
   return {
     statusCode: 400,
     message: err.message,

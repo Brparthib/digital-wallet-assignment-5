@@ -26,17 +26,16 @@ exports.createUserZodSchema = zod_1.default.object({
     })
         .regex(/^(?=.*\d)/, {
         message: "Password must contain at least 1 number.",
-    })
-        .optional(),
-    email: zod_1.default
-        .email({ message: "Invalid email address format." })
-        .min(5, { message: "Email must be at least 5 characters long." })
-        .max(100, { message: "Email cannot exceed 10 characters." })
-        .optional(),
-    address: zod_1.default
-        .string({ error: "Address must be string." })
-        .max(200, { message: "Address cannot exceed 200 characters." })
-        .optional(),
+    }),
+    // email: z
+    //   .email({ message: "Invalid email address format." })
+    //   .min(5, { message: "Email must be at least 5 characters long." })
+    //   .max(100, { message: "Email cannot exceed 10 characters." })
+    //   .optional(),
+    // address: z
+    //   .string({ error: "Address must be string." })
+    //   .max(200, { message: "Address cannot exceed 200 characters." })
+    //   .optional(),
 });
 exports.updateUserZodSchema = zod_1.default.object({
     name: zod_1.default

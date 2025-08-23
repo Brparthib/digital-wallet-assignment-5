@@ -16,6 +16,7 @@ interface EnvConfig {
   MINIMUM_BALANCE: string;
   CHARGE_LIMIT: string;
   PERCENTAGE_LIMIT: string;
+  FRONTEND_URL: string;
 }
 
 const loadEnvVars = (): EnvConfig => {
@@ -33,6 +34,7 @@ const loadEnvVars = (): EnvConfig => {
     "MINIMUM_BALANCE",
     "CHARGE_LIMIT",
     "PERCENTAGE_LIMIT",
+    "FRONTEND_URL",
   ];
 
   requiredEnvVars.forEach((key) => {
@@ -55,6 +57,7 @@ const loadEnvVars = (): EnvConfig => {
     MINIMUM_BALANCE: process.env.MINIMUM_BALANCE as string,
     CHARGE_LIMIT: process.env.CHARGE_LIMIT as string,
     PERCENTAGE_LIMIT: process.env.PERCENTAGE_LIMIT as string,
+    FRONTEND_URL: process.env.FRONTEND_URL as string,
   };
 };
 

@@ -8,11 +8,15 @@ import { Wallet } from "../wallet/wallet.model";
 import { JwtPayload } from "jsonwebtoken";
 
 const createUser = async (payload: Partial<IUser>) => {
-  const { phone, password, ...rest } = payload;
+  const { phone, role, password, ...rest } = payload;
 
   const isUserExists = await User.findOne({ phone });
   if (isUserExists) {
     throw new AppError(httpStatus.BAD_REQUEST, "User Already Exists!!");
+  }
+
+  if (role === Role.ADMIN) {
+    throw new AppError(httpStatus.BAD_REQUEST, "You are unauthorized!!");
   }
 
   const hashedPassword = await bcrypt.hash(
@@ -28,6 +32,7 @@ const createUser = async (payload: Partial<IUser>) => {
   const user = await User.create({
     phone,
     password: hashedPassword,
+    role: role,
     auths: [authProvider],
     ...rest,
   });
@@ -57,8 +62,8 @@ const getAllUsers = async () => {
   };
 };
 
-const getSingleUser = async (userId: string) => {
-  const user = await User.findById(userId);
+const getMyProfile = async (userId: string) => {
+  const user = await User.findById(userId).select("-password");
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "User Not Found!!");
   }
@@ -125,7 +130,7 @@ const deleteUser = async (userId: string) => {
 export const userServices = {
   createUser,
   getAllUsers,
-  getSingleUser,
+  getMyProfile,
   updateUser,
   deleteUser,
 };

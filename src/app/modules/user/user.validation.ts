@@ -11,6 +11,7 @@ export const createUserZodSchema = z.object({
       message:
         "Phone number must be valid for Bangladesh. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
     }),
+  role: z.string({ error: "Role must be string." }),
   password: z
     .string({ error: "Password must be string." })
     .min(8, { message: "Password must be at least 8 characters long." })
@@ -22,17 +23,7 @@ export const createUserZodSchema = z.object({
     })
     .regex(/^(?=.*\d)/, {
       message: "Password must contain at least 1 number.",
-    })
-    .optional(),
-  email: z
-    .email({ message: "Invalid email address format." })
-    .min(5, { message: "Email must be at least 5 characters long." })
-    .max(100, { message: "Email cannot exceed 10 characters." })
-    .optional(),
-  address: z
-    .string({ error: "Address must be string." })
-    .max(200, { message: "Address cannot exceed 200 characters." })
-    .optional(),
+    }),
 });
 
 export const updateUserZodSchema = z.object({

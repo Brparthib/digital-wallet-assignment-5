@@ -24,16 +24,6 @@ const transaction_model_1 = require("../transaction/transaction.model");
 const generateTransactionId_1 = require("../../utils/generateTransactionId");
 const transaction_interface_2 = require("../transaction/transaction.interface");
 const user_interface_1 = require("../user/user.interface");
-// const createWallet = async (userId: string) => {
-//   const min_amount = 50;
-//   const wallet = await Wallet.create({
-//     userId,
-//     balance: min_amount,
-//     status: Wallet_Status.ACTIVE,
-//     currency: "BDT",
-//   });
-//   return wallet;
-// };
 const getAllWallets = () => __awaiter(void 0, void 0, void 0, function* () {
     const wallets = yield wallet_model_1.Wallet.find({});
     if (!wallets) {
@@ -95,7 +85,7 @@ const sendMoney = (toPhone, amount, note, decodedToken) => __awaiter(void 0, voi
     }
     adminWallet.balance += fee;
     const sendAmount = amount - fee;
-    senderWallet.balance -= sendAmount;
+    senderWallet.balance -= amount;
     receiverWallet.balance += sendAmount;
     senderWallet.save();
     receiverWallet.save();
@@ -182,7 +172,7 @@ const cashOut = (toPhone, amount, decodedToken) => __awaiter(void 0, void 0, voi
     }
     adminWallet.balance += fee;
     const sendAmount = amount - fee;
-    senderWallet.balance -= sendAmount;
+    senderWallet.balance -= amount;
     receiverWallet.balance += sendAmount;
     senderWallet.save();
     receiverWallet.save();

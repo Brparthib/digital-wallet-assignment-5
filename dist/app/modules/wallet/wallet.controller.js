@@ -17,16 +17,6 @@ const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const catchAsync_1 = require("../../utils/catchAsync");
 const wallet_service_1 = require("./wallet.service");
 const sendResponse_1 = require("../../utils/sendResponse");
-// const createWallet = catchAsync(async (req: Request, res: Response) => {
-//   const { userId } = req.body;
-//   const wallet = await walletServices.createWallet(userId);
-//   sendResponse(res, {
-//     statusCode: httpStatus.CREATED,
-//     success: true,
-//     message: "Wallet Created Successfully",
-//     data: wallet,
-//   });
-// });
 const getAllWallets = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const wallets = yield wallet_service_1.walletServices.getAllWallets();
     (0, sendResponse_1.sendResponse)(res, {

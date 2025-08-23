@@ -21,6 +21,7 @@ const loadEnvVars = () => {
         "MINIMUM_BALANCE",
         "CHARGE_LIMIT",
         "PERCENTAGE_LIMIT",
+        "FRONTEND_URL",
     ];
     requiredEnvVars.forEach((key) => {
         if (!process.env[key]) {
@@ -41,6 +42,7 @@ const loadEnvVars = () => {
         MINIMUM_BALANCE: process.env.MINIMUM_BALANCE,
         CHARGE_LIMIT: process.env.CHARGE_LIMIT,
         PERCENTAGE_LIMIT: process.env.PERCENTAGE_LIMIT,
+        FRONTEND_URL: process.env.FRONTEND_URL,
     };
 };
 exports.envVars = loadEnvVars();

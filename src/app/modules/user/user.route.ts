@@ -8,15 +8,15 @@ import { Role } from "./user.interface";
 const router = Router();
 
 router.post(
-  "/create-user",
+  "/register",
   validateRequest(createUserZodSchema),
   userControllers.createUser
 );
 router.get("/", checkAuth(Role.ADMIN), userControllers.getAllUsers);
 router.get(
-  "/:id",
+  "/me",
   checkAuth(...Object.values(Role)),
-  userControllers.getSingleUser
+  userControllers.getMyProfile
 );
 router.patch(
   "/:id",
