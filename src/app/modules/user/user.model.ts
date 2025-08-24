@@ -44,6 +44,9 @@ const userSchema = new Schema<IUser>(
       default: User_Status.ACTIVE,
     },
     auths: [authProviderSchema],
+    claimRole: {
+      type: String,
+    },
   },
   { timestamps: true, versionKey: false }
 );

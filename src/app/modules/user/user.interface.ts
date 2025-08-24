@@ -34,4 +34,5 @@ export interface IUser {
   isDeleted?: boolean;
   status?: User_Status;
   auths?: IAuthProvider[];
+  claimRole?: Role;
 }

@@ -30,10 +30,10 @@ const getAllWallets = async () => {
   };
 };
 
-const getWalletByUser = async (userId: string) => {
-  const wallet = await Wallet.findOne({ userId });
+const getMyWallet = async (phone: string) => {
+  const wallet = await Wallet.findOne({ phone });
   if (!wallet) {
-    throw new AppError(httpStatus.NOT_FOUND, "Data Not Found!!");
+    throw new AppError(httpStatus.NOT_FOUND, "Wallet Not Found!!");
   }
 
   return wallet;
@@ -75,6 +75,13 @@ const sendMoney = async (
     throw new AppError(httpStatus.BAD_REQUEST, "User does not exists!!");
   }
 
+  if (decodedToken.phone === toPhone) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Cash-in to your own number is not allowed.!!"
+    );
+  }
+
   const senderWallet = await Wallet.findOne({ phone: decodedToken.phone });
   const receiverWallet = await Wallet.findOne({ phone: toPhone });
   if (
@@ -86,11 +93,15 @@ const sendMoney = async (
     throw new AppError(httpStatus.BAD_REQUEST, "Wallet is blocked!!");
   }
 
-  if (senderWallet.balance < amount) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Insufficient Balance!!");
-  }
-
   const fee = (Number(envVars.CHARGE_LIMIT) * amount) / 1000;
+  const sufficientAmount = amount + fee;
+
+  if (senderWallet.balance < sufficientAmount) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `Insufficient balance. You need at least [${amount} + ${fee}]: ${sufficientAmount} BDT to complete this transaction.`
+    );
+  }
 
   const adminWallet = await Wallet.findOne({ phone: envVars.ADMIN_PHONE });
   if (!adminWallet) {
@@ -99,10 +110,8 @@ const sendMoney = async (
 
   adminWallet.balance += fee;
 
-  const sendAmount = amount - fee;
-
-  senderWallet.balance -= amount;
-  receiverWallet.balance += sendAmount;
+  senderWallet.balance -= sufficientAmount;
+  receiverWallet.balance += amount;
 
   senderWallet.save();
   receiverWallet.save();
@@ -140,6 +149,13 @@ const cashIn = async (
     decodedToken.approval === Approval.SUSPEND
   ) {
     throw new AppError(httpStatus.BAD_REQUEST, "You are unauthorized!!");
+  }
+
+  if (decodedToken.phone === toPhone) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Cash-in to your own number is not allowed.!!"
+    );
   }
 
   const isUserExists = await User.findOne({ phone: toPhone });
@@ -218,11 +234,15 @@ const cashOut = async (
     throw new AppError(httpStatus.BAD_REQUEST, "Wallet is blocked!!");
   }
 
-  if (senderWallet.balance < amount) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Insufficient Balance!!");
+  const fee = (Number(envVars.CHARGE_LIMIT) * amount) / 1000;
+  const sufficientAmount = amount + fee;
+  if (senderWallet.balance < sufficientAmount) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `Insufficient balance. You need at least [${amount} + ${fee}]: ${sufficientAmount} BDT to complete this transaction.`
+    );
   }
 
-  const fee = (Number(envVars.CHARGE_LIMIT) * amount) / 1000;
   const commission = fee * (Number(envVars.PERCENTAGE_LIMIT) / 100);
 
   const adminWallet = await Wallet.findOne({ phone: envVars.ADMIN_PHONE });
@@ -232,10 +252,8 @@ const cashOut = async (
 
   adminWallet.balance += fee;
 
-  const sendAmount = amount - fee;
-
-  senderWallet.balance -= amount;
-  receiverWallet.balance += sendAmount;
+  senderWallet.balance -= sufficientAmount;
+  receiverWallet.balance += amount;
 
   senderWallet.save();
   receiverWallet.save();
@@ -257,7 +275,7 @@ const cashOut = async (
 
 export const walletServices = {
   getAllWallets,
-  getWalletByUser,
+  getMyWallet,
   updateWallet,
   sendMoney,
   cashIn,

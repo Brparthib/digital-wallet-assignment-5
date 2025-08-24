@@ -14,9 +14,9 @@ router.get(
   walletControllers.getAllWallets
 );
 router.get(
-  "/:id",
+  "/my-wallet",
   checkAuth(...Object.values(Role)),
-  walletControllers.getWalletByUser
+  walletControllers.getMyWallet
 );
 router.patch("/:id", checkAuth(Role.ADMIN), walletControllers.updateWallet);
 

@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { walletServices } from "./wallet.service";
 import { sendResponse } from "../../utils/sendResponse";
+import { JwtPayload } from "jsonwebtoken";
 
 const getAllWallets = catchAsync(async (req: Request, res: Response) => {
   const wallets = await walletServices.getAllWallets();
@@ -16,8 +17,9 @@ const getAllWallets = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getWalletByUser = catchAsync(async (req: Request, res: Response) => {
-  const wallet = await walletServices.getWalletByUser(req.params.id);
+const getMyWallet = catchAsync(async (req: Request, res: Response) => {
+  const verifiedToken = req.user as JwtPayload;
+  const wallet = await walletServices.getMyWallet(verifiedToken.phone);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -93,7 +95,7 @@ const cashOut = catchAsync(async (req: Request, res: Response) => {
 
 export const walletControllers = {
   getAllWallets,
-  getWalletByUser,
+  getMyWallet,
   updateWallet,
   sendMoney,
   cashIn,

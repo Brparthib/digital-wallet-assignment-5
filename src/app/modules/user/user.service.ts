@@ -1,7 +1,7 @@
 import httpStatus from "http-status-codes";
 import { envVars } from "../../configs/envCon";
 import AppError from "../../errorHelpers/AppError";
-import { Approval, IAuthProvider, IUser, Role } from "./user.interface";
+import { IAuthProvider, IUser, Role } from "./user.interface";
 import { User } from "./user.model";
 import bcrypt from "bcryptjs";
 import { Wallet } from "../wallet/wallet.model";
@@ -32,7 +32,7 @@ const createUser = async (payload: Partial<IUser>) => {
   const user = await User.create({
     phone,
     password: hashedPassword,
-    role: role,
+    claimRole: role,
     auths: [authProvider],
     ...rest,
   });
@@ -76,6 +76,11 @@ const updateUser = async (
   payload: Partial<IUser>,
   decodedToken: JwtPayload
 ) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Not Found!!");
+  }
+
   if (payload.password) {
     payload.password = await bcrypt.hash(
       payload.password as string,
@@ -87,23 +92,21 @@ const updateUser = async (
     throw new AppError(httpStatus.FORBIDDEN, "You are unauthorized!!");
   }
 
-  if (payload.role === Role.ADMIN && decodedToken.role !== Role.ADMIN) {
+  if (
+    (payload.role === Role.ADMIN || payload.role === Role.AGENT) &&
+    decodedToken.role !== Role.ADMIN
+  ) {
     throw new AppError(httpStatus.FORBIDDEN, "You are unauthorized!!");
   }
 
   let message = "";
-  if (payload.role === Role.AGENT && decodedToken.role !== Role.USER) {
+  if (payload.claimRole === Role.AGENT && decodedToken.role === Role.USER) {
     message =
-      "You have claimed to be an agent. Please wait for admin approval. You can continue using the wallet until you're approved.";
+      "You have claimed to be an agent. Please wait for admin approval. You can continue using the wallet as user until you're approved.";
   }
 
-  if (
-    payload.role === Role.AGENT &&
-    decodedToken.role !== Role.AGENT &&
-    decodedToken.approval === Approval.SUSPEND
-  ) {
-    message =
-      "You have claimed to be an agent. Please wait for admin approval. You can continue using the wallet until you're approved.";
+  if (payload.approval && decodedToken.role === Role.ADMIN) {
+    payload.role = Role.USER;
   }
 
   const updatedUser = await User.findByIdAndUpdate(userId, payload, {
