@@ -13,7 +13,7 @@ router.get(
 router.get(
   "/my-transaction",
   checkAuth(...Object.values(Role)),
-  transactionControllers.getTransactionsById
+  transactionControllers.getMyTransactions
 );
 
 export const transactionRoutes = router;

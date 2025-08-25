@@ -3,9 +3,11 @@ import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { transactionServices } from "./transaction.service";
 import { sendResponse } from "../../utils/sendResponse";
+import { addCountryCode } from "../../utils/addCountryCode";
 
 const getAllTransactions = catchAsync(async (req: Request, res: Response) => {
-  const transactions = await transactionServices.getAllTransactions();
+  const query = req.query;
+  const transactions = await transactionServices.getAllTransactions(query as Record<string, string>);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -16,10 +18,27 @@ const getAllTransactions = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getTransactionsById = catchAsync(async (req: Request, res: Response) => {
+const getMyTransactions = catchAsync(async (req: Request, res: Response) => {
   const verifiedToken = req.user;
-  const transactions = await transactionServices.getTransactionsById(
-    verifiedToken
+  const query = req.query;
+
+  if (typeof query.fromUser === "string") {
+    const formatted = addCountryCode(query.fromUser, "BD");
+    if (formatted) {
+      query.fromUser = formatted;
+    }
+  }
+
+  if (typeof query.toUser === "string") {
+    const formatted = addCountryCode(query.toUser, "BD");
+    if (formatted) {
+      query.toUser = formatted;
+    }
+  }
+
+  const transactions = await transactionServices.getMyTransactions(
+    verifiedToken,
+    query as Record<string, string>
   );
 
   sendResponse(res, {
@@ -33,5 +52,5 @@ const getTransactionsById = catchAsync(async (req: Request, res: Response) => {
 
 export const transactionControllers = {
   getAllTransactions,
-  getTransactionsById,
+  getMyTransactions,
 };

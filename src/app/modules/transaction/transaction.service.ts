@@ -1,43 +1,51 @@
-import httpStatus from "http-status-codes";
-import AppError from "../../errorHelpers/AppError";
 import { Transaction } from "./transaction.model";
 import { JwtPayload } from "jsonwebtoken";
+import { QueryBuilder } from "../../utils/queryBuilder";
+import { transactionSearchField } from "./transaction.constant";
 
-const getAllTransactions = async () => {
-  const transactions = await Transaction.find({});
-  if (!transactions) {
-    throw new AppError(httpStatus.NOT_FOUND, "Transactions Not Found!!");
-  }
-  const totalTransactions = await Transaction.countDocuments();
+const getAllTransactions = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(Transaction.find(), query);
 
-  return {
-    data: transactions,
-    meta: {
-      total: totalTransactions,
-    },
-  };
+  const myTransactions = await queryBuilder
+    .search(transactionSearchField)
+    .filter()
+    .sort()
+    .fields()
+    .paginate();
+
+  const [data, meta] = await Promise.all([
+    myTransactions.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return { data, meta };
 };
 
-const getTransactionsById = async (decodedToken: JwtPayload) => {
-  const transactions = await Transaction.find({
-    $or: [{ fromUser: decodedToken.phone }, { toUser: decodedToken.phone }],
-  });
-  if (!transactions) {
-    throw new AppError(httpStatus.NOT_FOUND, "Transactions Not Found!!");
-  }
-  const totalTransactions = await Transaction.find({
-    $or: [{ fromUser: decodedToken.phone }, { toUser: decodedToken.phone }],
-  }).countDocuments();
+const getMyTransactions = async (
+  decodedToken: JwtPayload,
+  query: Record<string, string>
+) => {
+  const queryBuilder = new QueryBuilder(
+    Transaction.find({
+      $or: [{ fromUser: decodedToken.phone }, { toUser: decodedToken.phone }],
+    }),
+    query
+  );
 
-  return {
-    data: transactions,
-    meta: {
-      total: totalTransactions,
-    },
-  };
+  const myTransactions = await queryBuilder
+    .search(transactionSearchField)
+    .filter()
+    .paginate();
+
+  const [data, meta] = await Promise.all([
+    myTransactions.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return { data, meta };
 };
 
 export const transactionServices = {
   getAllTransactions,
-  getTransactionsById,
+  getMyTransactions,
 };
