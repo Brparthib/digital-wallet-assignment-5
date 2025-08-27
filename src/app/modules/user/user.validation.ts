@@ -62,6 +62,7 @@ export const updateUserZodSchema = z.object({
     .string({ error: "Address must be string." })
     .max(200, { message: "Address cannot exceed 200 characters." })
     .optional(),
+  status: z.string().optional(),
   approval: z.string().optional(),
   claimRole: z.string().optional(),
 });

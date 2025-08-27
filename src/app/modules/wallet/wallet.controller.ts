@@ -4,9 +4,15 @@ import { catchAsync } from "../../utils/catchAsync";
 import { walletServices } from "./wallet.service";
 import { sendResponse } from "../../utils/sendResponse";
 import { JwtPayload } from "jsonwebtoken";
+import { addCountryCode } from "../../utils/addCountryCode";
 
 const getAllWallets = catchAsync(async (req: Request, res: Response) => {
-  const wallets = await walletServices.getAllWallets();
+  const query = req.query as Record<string, string>;
+  if (query.phone) {
+    const formatted = addCountryCode(query.phone, "BD");
+    query.phone = formatted as string;
+  }
+  const wallets = await walletServices.getAllWallets(query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -29,9 +35,34 @@ const getMyWallet = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getUserWallet = catchAsync(async (req: Request, res: Response) => {
+  const phone = addCountryCode(req.params.phone, "BD") as string;
+  const wallet = await walletServices.getUserWallet(phone);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Wallet Retrieved Successfully",
+    data: wallet,
+  });
+});
+
 const updateWallet = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.params.id;
-  const wallet = await walletServices.updateWallet(userId);
+  const phone = req.params.phone;
+  const status = req.body;
+  const wallet = await walletServices.updateWallet(phone, status);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: `Wallet ${wallet.status} Successfully`,
+    data: wallet,
+  });
+});
+
+const toggleWalletStatus = catchAsync(async (req: Request, res: Response) => {
+  const phone = addCountryCode(req.params.phone, "BD") as string;
+  const wallet = await walletServices.toggleWalletStatus(phone);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -96,7 +127,9 @@ const cashOut = catchAsync(async (req: Request, res: Response) => {
 export const walletControllers = {
   getAllWallets,
   getMyWallet,
+  getUserWallet,
   updateWallet,
+  toggleWalletStatus,
   sendMoney,
   cashIn,
   cashOut,

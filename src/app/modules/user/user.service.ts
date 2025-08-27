@@ -1,11 +1,19 @@
 import httpStatus from "http-status-codes";
 import { envVars } from "../../configs/envCon";
 import AppError from "../../errorHelpers/AppError";
-import { IAuthProvider, IUser, Role } from "./user.interface";
+import {
+  Approval,
+  IAuthProvider,
+  IUser,
+  Role,
+  User_Status,
+} from "./user.interface";
 import { User } from "./user.model";
 import bcrypt from "bcryptjs";
 import { Wallet } from "../wallet/wallet.model";
 import { JwtPayload } from "jsonwebtoken";
+import { QueryBuilder } from "../../utils/queryBuilder";
+import { userSearchField } from "./user.constant";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { phone, role, password, ...rest } = payload;
@@ -46,20 +54,21 @@ const createUser = async (payload: Partial<IUser>) => {
   return { user, wallet };
 };
 
-const getAllUsers = async () => {
-  const users = await User.find();
-  if (!users) {
-    throw new AppError(httpStatus.NOT_FOUND, "Users Not Found!!");
-  }
+const getAllUsers = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(User.find(), query);
+  const users = queryBuilder
+    .search(userSearchField)
+    .filter()
+    .sort()
+    .fields()
+    .paginate();
 
-  const totalUser = await User.countDocuments();
+  const [data, meta] = await Promise.all([
+    users.build(),
+    queryBuilder.getMeta(),
+  ]);
 
-  return {
-    data: users,
-    meta: {
-      total: totalUser,
-    },
-  };
+  return { data, meta };
 };
 
 const getMyProfile = async (userId: string) => {
@@ -88,8 +97,17 @@ const updateUser = async (
     );
   }
 
+  if (
+    payload.status === User_Status.BLOCKED &&
+    decodedToken.role !== Role.ADMIN
+  ) {
+    throw new AppError(httpStatus.FORBIDDEN, "You are unauthorized!!");
+  }
+
   if (payload.approval && decodedToken.role !== Role.ADMIN) {
     throw new AppError(httpStatus.FORBIDDEN, "You are unauthorized!!");
+  } else {
+    payload.role = user.claimRole;
   }
 
   if (
@@ -106,7 +124,9 @@ const updateUser = async (
   }
 
   if (payload.approval && decodedToken.role === Role.ADMIN) {
-    payload.role = Role.USER;
+    if (payload.approval === Approval.SUSPEND) {
+      payload.role = Role.USER;
+    }
   }
 
   const updatedUser = await User.findByIdAndUpdate(userId, payload, {

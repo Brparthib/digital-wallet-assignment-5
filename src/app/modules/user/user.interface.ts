@@ -35,4 +35,5 @@ export interface IUser {
   status?: User_Status;
   auths?: IAuthProvider[];
   claimRole?: Role;
+  createdAt?: Date;
 }

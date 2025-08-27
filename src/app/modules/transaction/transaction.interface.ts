@@ -20,4 +20,5 @@ export interface ITransaction {
   commission?: number;
   fee?: number;
   note?: string;
+  createdAt?: Date;
 }

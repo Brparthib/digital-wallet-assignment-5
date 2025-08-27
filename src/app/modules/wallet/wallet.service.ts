@@ -13,21 +13,25 @@ import {
   TransactionType,
 } from "../transaction/transaction.interface";
 import { Approval, Role } from "../user/user.interface";
+import { QueryBuilder } from "../../utils/queryBuilder";
+import { walletSearchField } from "./wallet.constant";
 
-const getAllWallets = async () => {
-  const wallets = await Wallet.find({});
-  if (!wallets) {
-    throw new AppError(httpStatus.NOT_FOUND, "Data Not Found!!");
-  }
+const getAllWallets = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(Wallet.find(), query);
 
-  const totalWallet = await Wallet.countDocuments();
+  const wallet = queryBuilder
+    .search(walletSearchField)
+    .filter()
+    .sort()
+    .fields()
+    .paginate();
 
-  return {
-    data: wallets,
-    meta: {
-      total: totalWallet,
-    },
-  };
+  const [data, meta] = await Promise.all([
+    wallet.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return { data, meta };
 };
 
 const getMyWallet = async (phone: string) => {
@@ -39,8 +43,30 @@ const getMyWallet = async (phone: string) => {
   return wallet;
 };
 
-const updateWallet = async (userId: string) => {
-  const wallet = await Wallet.findOne({ userId });
+const getUserWallet = async (phone: string) => {
+  const wallet = await Wallet.findOne({ phone });
+  if (!wallet) {
+    throw new AppError(httpStatus.NOT_FOUND, "Wallet Not Found!!");
+  }
+
+  return wallet;
+};
+
+const updateWallet = async (phone: string, status: string) => {
+  const wallet = await Wallet.findOne({ phone });
+  if (!wallet) {
+    throw new AppError(httpStatus.NOT_FOUND, "Wallet Not Found!!");
+  }
+
+  wallet.status = status as Wallet_Status;
+
+  wallet.save();
+
+  return wallet;
+};
+
+const toggleWalletStatus = async (phone: string) => {
+  const wallet = await Wallet.findOne({ phone });
   if (!wallet) {
     throw new AppError(httpStatus.NOT_FOUND, "Wallet Not Found!!");
   }
@@ -250,10 +276,10 @@ const cashOut = async (
     throw new AppError(httpStatus.BAD_REQUEST, "Admin does not exists!!");
   }
 
-  adminWallet.balance += fee;
+  adminWallet.balance += fee - commission; // admin wallet fee - commission
 
-  senderWallet.balance -= sufficientAmount;
-  receiverWallet.balance += amount;
+  senderWallet.balance -= sufficientAmount; // user wallet amount + fee
+  receiverWallet.balance += amount + commission; // agent wallet
 
   senderWallet.save();
   receiverWallet.save();
@@ -266,7 +292,7 @@ const cashOut = async (
     fromUser: decodedToken.phone,
     toUser: toPhone,
     commission: commission,
-    fee: fee - commission,
+    fee: fee,
     status: Transaction_Status.COMPLETE,
   })) as ITransaction;
 
@@ -276,7 +302,9 @@ const cashOut = async (
 export const walletServices = {
   getAllWallets,
   getMyWallet,
+  getUserWallet,
   updateWallet,
+  toggleWalletStatus,
   sendMoney,
   cashIn,
   cashOut,

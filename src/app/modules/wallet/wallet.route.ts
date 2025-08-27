@@ -8,16 +8,18 @@ const router = Router();
 router.post("/send-money", checkAuth(Role.USER), walletControllers.sendMoney);
 router.post("/cash-in", checkAuth(Role.AGENT), walletControllers.cashIn);
 router.post("/cash-out", checkAuth(Role.USER), walletControllers.cashOut);
-router.get(
-  "/all-wallet",
-  checkAuth(Role.ADMIN),
-  walletControllers.getAllWallets
-);
+router.get("/", checkAuth(Role.ADMIN), walletControllers.getAllWallets);
 router.get(
   "/my-wallet",
   checkAuth(...Object.values(Role)),
   walletControllers.getMyWallet
 );
-router.patch("/:id", checkAuth(Role.ADMIN), walletControllers.updateWallet);
+router.patch("/:phone", checkAuth(Role.ADMIN), walletControllers.updateWallet);
+// router.get("/:phone", checkAuth(Role.ADMIN), walletControllers.getUserWallet);
+// router.patch(
+//   "/:phone",
+//   checkAuth(Role.ADMIN),
+//   walletControllers.toggleWalletStatus
+// );
 
 export const walletRoutes = router;
