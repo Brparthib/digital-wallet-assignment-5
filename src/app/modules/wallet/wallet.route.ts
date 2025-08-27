@@ -2,6 +2,8 @@ import { Router } from "express";
 import { walletControllers } from "./wallet.controller";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "../user/user.interface";
+import { validateRequest } from "../../middlewares/validateRequest";
+import { updateWalletZodSchema } from "./wallet.validation";
 
 const router = Router();
 
@@ -14,12 +16,12 @@ router.get(
   checkAuth(...Object.values(Role)),
   walletControllers.getMyWallet
 );
-router.patch("/:phone", checkAuth(Role.ADMIN), walletControllers.updateWallet);
+router.patch(
+  "/:phone",
+  checkAuth(Role.ADMIN),
+  validateRequest(updateWalletZodSchema),
+  walletControllers.updateWallet
+);
 // router.get("/:phone", checkAuth(Role.ADMIN), walletControllers.getUserWallet);
-// router.patch(
-//   "/:phone",
-//   checkAuth(Role.ADMIN),
-//   walletControllers.toggleWalletStatus
-// );
 
 export const walletRoutes = router;

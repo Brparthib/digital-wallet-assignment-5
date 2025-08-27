@@ -65,23 +65,6 @@ const updateWallet = async (phone: string, status: string) => {
   return wallet;
 };
 
-const toggleWalletStatus = async (phone: string) => {
-  const wallet = await Wallet.findOne({ phone });
-  if (!wallet) {
-    throw new AppError(httpStatus.NOT_FOUND, "Wallet Not Found!!");
-  }
-
-  if (wallet.status === Wallet_Status.UNBLOCKED) {
-    wallet.status = Wallet_Status.BLOCKED;
-  } else {
-    wallet.status = Wallet_Status.UNBLOCKED;
-  }
-
-  wallet.save();
-
-  return wallet;
-};
-
 // user can send money to another user
 const sendMoney = async (
   toPhone: string,
@@ -304,7 +287,6 @@ export const walletServices = {
   getMyWallet,
   getUserWallet,
   updateWallet,
-  toggleWalletStatus,
   sendMoney,
   cashIn,
   cashOut,

@@ -10,5 +10,5 @@ export interface IWallet {
   phone: string;
   balance: number;
   currency?: "BDT";
-  status: Wallet_Status;
+  status?: Wallet_Status;
 }

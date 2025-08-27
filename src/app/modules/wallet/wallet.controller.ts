@@ -48,21 +48,9 @@ const getUserWallet = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateWallet = catchAsync(async (req: Request, res: Response) => {
-  const phone = req.params.phone;
-  const status = req.body;
-  const wallet = await walletServices.updateWallet(phone, status);
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: `Wallet ${wallet.status} Successfully`,
-    data: wallet,
-  });
-});
-
-const toggleWalletStatus = catchAsync(async (req: Request, res: Response) => {
   const phone = addCountryCode(req.params.phone, "BD") as string;
-  const wallet = await walletServices.toggleWalletStatus(phone);
+  const { status } = req.body;
+  const wallet = await walletServices.updateWallet(phone, status);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -129,7 +117,6 @@ export const walletControllers = {
   getMyWallet,
   getUserWallet,
   updateWallet,
-  toggleWalletStatus,
   sendMoney,
   cashIn,
   cashOut,

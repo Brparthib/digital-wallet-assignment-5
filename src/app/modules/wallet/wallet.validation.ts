@@ -8,5 +8,9 @@ export const createWalletZodSchema = z.object({
       message:
         "Phone number must be valid for Bangladesh. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
     }),
-    status: z.string().optional(),
+  status: z.string().optional(),
+});
+
+export const updateWalletZodSchema = z.object({
+  status: z.enum(["UNBLOCKED", "BLOCKED"]).optional(),
 });
