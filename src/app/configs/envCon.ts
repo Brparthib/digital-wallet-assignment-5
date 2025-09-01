@@ -5,7 +5,7 @@ dotenv.config();
 interface EnvConfig {
   PORT: string;
   DB_URL: string;
-  NODE_ENV: "development" | "production";
+  NODE_ENV: string;
   BCRYPT_SALT_ROUND: string;
   ADMIN_PHONE: string;
   ADMIN_PASSWORD: string;
@@ -46,7 +46,7 @@ const loadEnvVars = (): EnvConfig => {
   return {
     PORT: process.env.PORT as string,
     DB_URL: process.env.DB_URL as string,
-    NODE_ENV: process.env.NODE_ENV as "development" | "production",
+    NODE_ENV: process.env.NODE_ENV as string,
     BCRYPT_SALT_ROUND: process.env.BCRYPT_SALT_ROUND as string,
     ADMIN_PHONE: process.env.ADMIN_PHONE as string,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD as string,

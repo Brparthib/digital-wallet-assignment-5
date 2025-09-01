@@ -27,7 +27,8 @@ const createUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, 
     });
 }));
 const getAllUsers = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield user_service_1.userServices.getAllUsers();
+    const query = req.query;
+    const users = yield user_service_1.userServices.getAllUsers(query);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,
@@ -36,8 +37,9 @@ const getAllUsers = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0,
         data: users.data,
     });
 }));
-const getSingleUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield user_service_1.userServices.getSingleUser(req.params.id);
+const getMyProfile = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const verifiedToken = req.user;
+    const user = yield user_service_1.userServices.getMyProfile(verifiedToken.userId);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,
@@ -69,7 +71,7 @@ const deletedUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0,
 exports.userControllers = {
     createUser,
     getAllUsers,
-    getSingleUser,
+    getMyProfile,
     updateUser,
     deletedUser,
 };

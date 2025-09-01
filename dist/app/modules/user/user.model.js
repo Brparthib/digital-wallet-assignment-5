@@ -14,9 +14,9 @@ const userSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     phone: { type: String, required: true, unique: true },
     password: { type: String },
-    email: { type: String, },
-    picture: { type: String },
+    email: { type: String },
     address: { type: String },
+    picture: { type: String },
     role: {
         type: String,
         enum: Object.values(user_interface_1.Role),
@@ -35,5 +35,8 @@ const userSchema = new mongoose_1.Schema({
         default: user_interface_1.User_Status.ACTIVE,
     },
     auths: [authProviderSchema],
+    claimRole: {
+        type: String,
+    },
 }, { timestamps: true, versionKey: false });
 exports.User = (0, mongoose_1.model)("User", userSchema);

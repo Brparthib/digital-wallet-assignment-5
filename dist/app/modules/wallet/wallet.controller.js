@@ -17,8 +17,14 @@ const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const catchAsync_1 = require("../../utils/catchAsync");
 const wallet_service_1 = require("./wallet.service");
 const sendResponse_1 = require("../../utils/sendResponse");
+const addCountryCode_1 = require("../../utils/addCountryCode");
 const getAllWallets = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const wallets = yield wallet_service_1.walletServices.getAllWallets();
+    const query = req.query;
+    if (query.phone) {
+        const formatted = (0, addCountryCode_1.addCountryCode)(query.phone, "BD");
+        query.phone = formatted;
+    }
+    const wallets = yield wallet_service_1.walletServices.getAllWallets(query);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,
@@ -27,8 +33,19 @@ const getAllWallets = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 
         meta: wallets.meta,
     });
 }));
-const getWalletByUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const wallet = yield wallet_service_1.walletServices.getWalletByUser(req.params.id);
+const getMyWallet = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const verifiedToken = req.user;
+    const wallet = yield wallet_service_1.walletServices.getMyWallet(verifiedToken.phone);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Wallet Retrieved Successfully",
+        data: wallet,
+    });
+}));
+const getUserWallet = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const phone = (0, addCountryCode_1.addCountryCode)(req.params.phone, "BD");
+    const wallet = yield wallet_service_1.walletServices.getUserWallet(phone);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,
@@ -37,8 +54,9 @@ const getWalletByUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(voi
     });
 }));
 const updateWallet = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const userId = req.params.id;
-    const wallet = yield wallet_service_1.walletServices.updateWallet(userId);
+    const phone = (0, addCountryCode_1.addCountryCode)(req.params.phone, "BD");
+    const { status } = req.body;
+    const wallet = yield wallet_service_1.walletServices.updateWallet(phone, status);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,
@@ -81,7 +99,8 @@ const cashOut = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, voi
 }));
 exports.walletControllers = {
     getAllWallets,
-    getWalletByUser,
+    getMyWallet,
+    getUserWallet,
     updateWallet,
     sendMoney,
     cashIn,

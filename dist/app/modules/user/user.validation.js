@@ -15,6 +15,7 @@ exports.createUserZodSchema = zod_1.default.object({
         .regex(/^(?:\+8801\d{9}|01\d{9})$/, {
         message: "Phone number must be valid for Bangladesh. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
     }),
+    role: zod_1.default.string({ error: "Role must be string." }),
     password: zod_1.default
         .string({ error: "Password must be string." })
         .min(8, { message: "Password must be at least 8 characters long." })
@@ -27,15 +28,6 @@ exports.createUserZodSchema = zod_1.default.object({
         .regex(/^(?=.*\d)/, {
         message: "Password must contain at least 1 number.",
     }),
-    // email: z
-    //   .email({ message: "Invalid email address format." })
-    //   .min(5, { message: "Email must be at least 5 characters long." })
-    //   .max(100, { message: "Email cannot exceed 10 characters." })
-    //   .optional(),
-    // address: z
-    //   .string({ error: "Address must be string." })
-    //   .max(200, { message: "Address cannot exceed 200 characters." })
-    //   .optional(),
 });
 exports.updateUserZodSchema = zod_1.default.object({
     name: zod_1.default
@@ -72,5 +64,7 @@ exports.updateUserZodSchema = zod_1.default.object({
         .string({ error: "Address must be string." })
         .max(200, { message: "Address cannot exceed 200 characters." })
         .optional(),
+    status: zod_1.default.string().optional(),
     approval: zod_1.default.string().optional(),
+    claimRole: zod_1.default.string().optional(),
 });

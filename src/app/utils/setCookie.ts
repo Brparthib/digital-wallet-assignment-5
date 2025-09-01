@@ -11,6 +11,7 @@ export const setCookie = (res: Response, tokenInfo: AuthTokens) => {
       httpOnly: true,
       secure: true,
       sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     });
   }
 
@@ -19,6 +20,7 @@ export const setCookie = (res: Response, tokenInfo: AuthTokens) => {
       httpOnly: true,
       secure: true,
       sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     });
   }
 };

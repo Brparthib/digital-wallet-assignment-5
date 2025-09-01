@@ -24,37 +24,42 @@ const transaction_model_1 = require("../transaction/transaction.model");
 const generateTransactionId_1 = require("../../utils/generateTransactionId");
 const transaction_interface_2 = require("../transaction/transaction.interface");
 const user_interface_1 = require("../user/user.interface");
-const getAllWallets = () => __awaiter(void 0, void 0, void 0, function* () {
-    const wallets = yield wallet_model_1.Wallet.find({});
-    if (!wallets) {
-        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Data Not Found!!");
-    }
-    const totalWallet = yield wallet_model_1.Wallet.countDocuments();
-    return {
-        data: wallets,
-        meta: {
-            total: totalWallet,
-        },
-    };
+const queryBuilder_1 = require("../../utils/queryBuilder");
+const wallet_constant_1 = require("./wallet.constant");
+const getAllWallets = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const queryBuilder = new queryBuilder_1.QueryBuilder(wallet_model_1.Wallet.find(), query);
+    const wallet = queryBuilder
+        .search(wallet_constant_1.walletSearchField)
+        .filter()
+        .sort()
+        .fields()
+        .paginate();
+    const [data, meta] = yield Promise.all([
+        wallet.build(),
+        queryBuilder.getMeta(),
+    ]);
+    return { data, meta };
 });
-const getWalletByUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const wallet = yield wallet_model_1.Wallet.findOne({ userId });
-    if (!wallet) {
-        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Data Not Found!!");
-    }
-    return wallet;
-});
-const updateWallet = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const wallet = yield wallet_model_1.Wallet.findOne({ userId });
+const getMyWallet = (phone) => __awaiter(void 0, void 0, void 0, function* () {
+    const wallet = yield wallet_model_1.Wallet.findOne({ phone });
     if (!wallet) {
         throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Wallet Not Found!!");
     }
-    if (wallet.status === wallet_interface_1.Wallet_Status.UNBLOCKED) {
-        wallet.status = wallet_interface_1.Wallet_Status.BLOCKED;
+    return wallet;
+});
+const getUserWallet = (phone) => __awaiter(void 0, void 0, void 0, function* () {
+    const wallet = yield wallet_model_1.Wallet.findOne({ phone });
+    if (!wallet) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Wallet Not Found!!");
     }
-    else {
-        wallet.status = wallet_interface_1.Wallet_Status.UNBLOCKED;
+    return wallet;
+});
+const updateWallet = (phone, status) => __awaiter(void 0, void 0, void 0, function* () {
+    const wallet = yield wallet_model_1.Wallet.findOne({ phone });
+    if (!wallet) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Wallet Not Found!!");
     }
+    wallet.status = status;
     wallet.save();
     return wallet;
 });
@@ -67,6 +72,9 @@ const sendMoney = (toPhone, amount, note, decodedToken) => __awaiter(void 0, voi
     if (!isUserExists || isUserExists.isDeleted) {
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "User does not exists!!");
     }
+    if (decodedToken.phone === toPhone) {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Cash-in to your own number is not allowed.!!");
+    }
     const senderWallet = yield wallet_model_1.Wallet.findOne({ phone: decodedToken.phone });
     const receiverWallet = yield wallet_model_1.Wallet.findOne({ phone: toPhone });
     if (!senderWallet ||
@@ -75,18 +83,18 @@ const sendMoney = (toPhone, amount, note, decodedToken) => __awaiter(void 0, voi
         receiverWallet.status === wallet_interface_1.Wallet_Status.BLOCKED) {
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Wallet is blocked!!");
     }
-    if (senderWallet.balance < amount) {
-        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Insufficient Balance!!");
-    }
     const fee = (Number(envCon_1.envVars.CHARGE_LIMIT) * amount) / 1000;
+    const sufficientAmount = amount + fee;
+    if (senderWallet.balance < sufficientAmount) {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, `Insufficient balance. You need at least [${amount} + ${fee}]: ${sufficientAmount} BDT to complete this transaction.`);
+    }
     const adminWallet = yield wallet_model_1.Wallet.findOne({ phone: envCon_1.envVars.ADMIN_PHONE });
     if (!adminWallet) {
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Admin does not exists!!");
     }
     adminWallet.balance += fee;
-    const sendAmount = amount - fee;
-    senderWallet.balance -= amount;
-    receiverWallet.balance += sendAmount;
+    senderWallet.balance -= sufficientAmount;
+    receiverWallet.balance += amount;
     senderWallet.save();
     receiverWallet.save();
     adminWallet.save();
@@ -110,6 +118,9 @@ const cashIn = (toPhone, amount, decodedToken) => __awaiter(void 0, void 0, void
     if (decodedToken.role === user_interface_1.Role.AGENT &&
         decodedToken.approval === user_interface_1.Approval.SUSPEND) {
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "You are unauthorized!!");
+    }
+    if (decodedToken.phone === toPhone) {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Cash-in to your own number is not allowed.!!");
     }
     const isUserExists = yield user_model_1.User.findOne({ phone: toPhone });
     if (!isUserExists || isUserExists.isDeleted) {
@@ -161,19 +172,19 @@ const cashOut = (toPhone, amount, decodedToken) => __awaiter(void 0, void 0, voi
         receiverWallet.status === wallet_interface_1.Wallet_Status.BLOCKED) {
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Wallet is blocked!!");
     }
-    if (senderWallet.balance < amount) {
-        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Insufficient Balance!!");
-    }
     const fee = (Number(envCon_1.envVars.CHARGE_LIMIT) * amount) / 1000;
+    const sufficientAmount = amount + fee;
+    if (senderWallet.balance < sufficientAmount) {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, `Insufficient balance. You need at least [${amount} + ${fee}]: ${sufficientAmount} BDT to complete this transaction.`);
+    }
     const commission = fee * (Number(envCon_1.envVars.PERCENTAGE_LIMIT) / 100);
     const adminWallet = yield wallet_model_1.Wallet.findOne({ phone: envCon_1.envVars.ADMIN_PHONE });
     if (!adminWallet) {
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Admin does not exists!!");
     }
-    adminWallet.balance += fee;
-    const sendAmount = amount - fee;
-    senderWallet.balance -= amount;
-    receiverWallet.balance += sendAmount;
+    adminWallet.balance += fee - commission; // admin wallet fee - commission
+    senderWallet.balance -= sufficientAmount; // user wallet amount + fee
+    receiverWallet.balance += amount + commission; // agent wallet
     senderWallet.save();
     receiverWallet.save();
     adminWallet.save();
@@ -184,14 +195,15 @@ const cashOut = (toPhone, amount, decodedToken) => __awaiter(void 0, void 0, voi
         fromUser: decodedToken.phone,
         toUser: toPhone,
         commission: commission,
-        fee: fee - commission,
+        fee: fee,
         status: transaction_interface_1.Transaction_Status.COMPLETE,
     }));
     return transaction;
 });
 exports.walletServices = {
     getAllWallets,
-    getWalletByUser,
+    getMyWallet,
+    getUserWallet,
     updateWallet,
     sendMoney,
     cashIn,

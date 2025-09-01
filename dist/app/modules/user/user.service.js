@@ -31,18 +31,23 @@ const user_interface_1 = require("./user.interface");
 const user_model_1 = require("./user.model");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const wallet_model_1 = require("../wallet/wallet.model");
+const queryBuilder_1 = require("../../utils/queryBuilder");
+const user_constant_1 = require("./user.constant");
 const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { phone, password } = payload, rest = __rest(payload, ["phone", "password"]);
+    const { phone, role, password } = payload, rest = __rest(payload, ["phone", "role", "password"]);
     const isUserExists = yield user_model_1.User.findOne({ phone });
     if (isUserExists) {
         throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "User Already Exists!!");
+    }
+    if (role === user_interface_1.Role.ADMIN) {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "You are unauthorized!!");
     }
     const hashedPassword = yield bcryptjs_1.default.hash(password, Number(envCon_1.envVars.BCRYPT_SALT_ROUND) | 10);
     const authProvider = {
         provider: "credentials",
         providerId: phone,
     };
-    const user = yield user_model_1.User.create(Object.assign({ phone, password: hashedPassword, auths: [authProvider] }, rest));
+    const user = yield user_model_1.User.create(Object.assign({ phone, password: hashedPassword, claimRole: role, auths: [authProvider] }, rest));
     const wallet = yield wallet_model_1.Wallet.create({
         userId: user._id,
         phone: phone,
@@ -50,46 +55,58 @@ const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     });
     return { user, wallet };
 });
-const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield user_model_1.User.find();
-    if (!users) {
-        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Users Not Found!!");
-    }
-    const totalUser = yield user_model_1.User.countDocuments();
-    return {
-        data: users,
-        meta: {
-            total: totalUser,
-        },
-    };
+const getAllUsers = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const queryBuilder = new queryBuilder_1.QueryBuilder(user_model_1.User.find(), query);
+    const users = queryBuilder
+        .search(user_constant_1.userSearchField)
+        .filter()
+        .sort()
+        .fields()
+        .paginate();
+    const [data, meta] = yield Promise.all([
+        users.build(),
+        queryBuilder.getMeta(),
+    ]);
+    return { data, meta };
 });
-const getSingleUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield user_model_1.User.findById(userId);
+const getMyProfile = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(userId).select("-password");
     if (!user) {
         throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User Not Found!!");
     }
     return user;
 });
 const updateUser = (userId, payload, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(userId);
+    if (!user) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User Not Found!!");
+    }
     if (payload.password) {
         payload.password = yield bcryptjs_1.default.hash(payload.password, Number(envCon_1.envVars.BCRYPT_SALT_ROUND) | 10);
+    }
+    if (payload.status === user_interface_1.User_Status.BLOCKED &&
+        decodedToken.role !== user_interface_1.Role.ADMIN) {
+        throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "You are unauthorized!!");
     }
     if (payload.approval && decodedToken.role !== user_interface_1.Role.ADMIN) {
         throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "You are unauthorized!!");
     }
-    if (payload.role === user_interface_1.Role.ADMIN && decodedToken.role !== user_interface_1.Role.ADMIN) {
+    else {
+        payload.role = user.claimRole;
+    }
+    if ((payload.role === user_interface_1.Role.ADMIN || payload.role === user_interface_1.Role.AGENT) &&
+        decodedToken.role !== user_interface_1.Role.ADMIN) {
         throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "You are unauthorized!!");
     }
     let message = "";
-    if (payload.role === user_interface_1.Role.AGENT && decodedToken.role !== user_interface_1.Role.USER) {
+    if (payload.claimRole === user_interface_1.Role.AGENT && decodedToken.role === user_interface_1.Role.USER) {
         message =
-            "You have claimed to be an agent. Please wait for admin approval. You can continue using the wallet until you're approved.";
+            "You have claimed to be an agent. Please wait for admin approval. You can continue using the wallet as user until you're approved.";
     }
-    if (payload.role === user_interface_1.Role.AGENT &&
-        decodedToken.role !== user_interface_1.Role.AGENT &&
-        decodedToken.approval === user_interface_1.Approval.SUSPEND) {
-        message =
-            "You have claimed to be an agent. Please wait for admin approval. You can continue using the wallet until you're approved.";
+    if (payload.approval && decodedToken.role === user_interface_1.Role.ADMIN) {
+        if (payload.approval === user_interface_1.Approval.SUSPEND) {
+            payload.role = user_interface_1.Role.USER;
+        }
     }
     const updatedUser = yield user_model_1.User.findByIdAndUpdate(userId, payload, {
         new: true,
@@ -109,7 +126,7 @@ const deleteUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
 exports.userServices = {
     createUser,
     getAllUsers,
-    getSingleUser,
+    getMyProfile,
     updateUser,
     deleteUser,
 };

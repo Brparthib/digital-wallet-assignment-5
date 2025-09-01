@@ -17,8 +17,10 @@ const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const catchAsync_1 = require("../../utils/catchAsync");
 const transaction_service_1 = require("./transaction.service");
 const sendResponse_1 = require("../../utils/sendResponse");
+const addCountryCode_1 = require("../../utils/addCountryCode");
 const getAllTransactions = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const transactions = yield transaction_service_1.transactionServices.getAllTransactions();
+    const query = req.query;
+    const transactions = yield transaction_service_1.transactionServices.getAllTransactions(query);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,
@@ -27,9 +29,22 @@ const getAllTransactions = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(
         data: transactions.data,
     });
 }));
-const getTransactionsById = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getMyTransactions = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const verifiedToken = req.user;
-    const transactions = yield transaction_service_1.transactionServices.getTransactionsById(verifiedToken);
+    const query = req.query;
+    if (typeof query.fromUser === "string") {
+        const formatted = (0, addCountryCode_1.addCountryCode)(query.fromUser, "BD");
+        if (formatted) {
+            query.fromUser = formatted;
+        }
+    }
+    if (typeof query.toUser === "string") {
+        const formatted = (0, addCountryCode_1.addCountryCode)(query.toUser, "BD");
+        if (formatted) {
+            query.toUser = formatted;
+        }
+    }
+    const transactions = yield transaction_service_1.transactionServices.getMyTransactions(verifiedToken, query);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: http_status_codes_1.default.OK,
         success: true,
@@ -40,5 +55,5 @@ const getTransactionsById = (0, catchAsync_1.catchAsync)((req, res) => __awaiter
 }));
 exports.transactionControllers = {
     getAllTransactions,
-    getTransactionsById,
+    getMyTransactions,
 };

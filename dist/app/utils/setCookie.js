@@ -7,6 +7,7 @@ const setCookie = (res, tokenInfo) => {
             httpOnly: true,
             secure: true,
             sameSite: "none",
+            maxAge: 1000 * 60 * 60 * 24 * 7,
         });
     }
     if (tokenInfo.refreshToken) {
@@ -14,6 +15,7 @@ const setCookie = (res, tokenInfo) => {
             httpOnly: true,
             secure: true,
             sameSite: "none",
+            maxAge: 1000 * 60 * 60 * 24 * 7,
         });
     }
 };

@@ -8,45 +8,40 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.transactionServices = void 0;
-const http_status_codes_1 = __importDefault(require("http-status-codes"));
-const AppError_1 = __importDefault(require("../../errorHelpers/AppError"));
 const transaction_model_1 = require("./transaction.model");
-const getAllTransactions = () => __awaiter(void 0, void 0, void 0, function* () {
-    const transactions = yield transaction_model_1.Transaction.find({});
-    if (!transactions) {
-        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Transactions Not Found!!");
-    }
-    const totalTransactions = yield transaction_model_1.Transaction.countDocuments();
-    return {
-        data: transactions,
-        meta: {
-            total: totalTransactions,
-        },
-    };
+const queryBuilder_1 = require("../../utils/queryBuilder");
+const transaction_constant_1 = require("./transaction.constant");
+const getAllTransactions = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const queryBuilder = new queryBuilder_1.QueryBuilder(transaction_model_1.Transaction.find(), query);
+    const myTransactions = yield queryBuilder
+        .search(transaction_constant_1.transactionSearchField)
+        .filter()
+        .sort()
+        .fields()
+        .paginate();
+    const [data, meta] = yield Promise.all([
+        myTransactions.build(),
+        queryBuilder.getMeta(),
+    ]);
+    return { data, meta };
 });
-const getTransactionsById = (decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
-    const transactions = yield transaction_model_1.Transaction.find({
+const getMyTransactions = (decodedToken, query) => __awaiter(void 0, void 0, void 0, function* () {
+    const queryBuilder = new queryBuilder_1.QueryBuilder(transaction_model_1.Transaction.find({
         $or: [{ fromUser: decodedToken.phone }, { toUser: decodedToken.phone }],
-    });
-    if (!transactions) {
-        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "Transactions Not Found!!");
-    }
-    const totalTransactions = yield transaction_model_1.Transaction.find({
-        $or: [{ fromUser: decodedToken.phone }, { toUser: decodedToken.phone }],
-    }).countDocuments();
-    return {
-        data: transactions,
-        meta: {
-            total: totalTransactions,
-        },
-    };
+    }), query);
+    const myTransactions = yield queryBuilder
+        .search(transaction_constant_1.transactionSearchField)
+        .filter()
+        .paginate();
+    const [data, meta] = yield Promise.all([
+        myTransactions.build(),
+        queryBuilder.getMeta(),
+    ]);
+    return { data, meta };
 });
 exports.transactionServices = {
     getAllTransactions,
-    getTransactionsById,
+    getMyTransactions,
 };
