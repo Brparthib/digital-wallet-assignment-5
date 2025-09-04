@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import { envVars } from "./app/configs/envCon";
 import app from "./app";
 import { seedAdmin } from "./app/utils/seedAdmin";
+import { seedDummyUser } from "./app/utils/seedDummyUser";
+import { seedDummyAgent } from "./app/utils/seedDummyAgent";
 
 let server: Server;
 
@@ -23,6 +25,8 @@ const startServer = async () => {
 (async () => {
   startServer();
   seedAdmin();
+  seedDummyAgent();
+  seedDummyUser();
 })();
 
 // unhandled rejection error handler

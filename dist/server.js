@@ -16,6 +16,8 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const envCon_1 = require("./app/configs/envCon");
 const app_1 = __importDefault(require("./app"));
 const seedAdmin_1 = require("./app/utils/seedAdmin");
+const seedDummyUser_1 = require("./app/utils/seedDummyUser");
+const seedDummyAgent_1 = require("./app/utils/seedDummyAgent");
 let server;
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -32,6 +34,8 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
 (() => __awaiter(void 0, void 0, void 0, function* () {
     startServer();
     (0, seedAdmin_1.seedAdmin)();
+    (0, seedDummyAgent_1.seedDummyAgent)();
+    (0, seedDummyUser_1.seedDummyUser)();
 }))();
 // unhandled rejection error handler
 process.on("unhandledRejection", (err) => {
