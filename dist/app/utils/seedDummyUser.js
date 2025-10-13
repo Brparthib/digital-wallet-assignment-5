@@ -36,7 +36,7 @@ const seedDummyUser = () => __awaiter(void 0, void 0, void 0, function* () {
             providerId: envCon_1.envVars.USER_PHONE,
         };
         const payload = {
-            name: "Dummy User",
+            name: "User",
             phone: envCon_1.envVars.USER_PHONE,
             password: hashedPassword,
             role: user_interface_1.Role.USER,
@@ -49,7 +49,7 @@ const seedDummyUser = () => __awaiter(void 0, void 0, void 0, function* () {
             phone: user.phone,
             balance: Number(envCon_1.envVars.MINIMUM_BALANCE),
         });
-        console.log(`Dummy User created successfully with ${wallet.balance} Tk wallet.`);
+        console.log(`User created successfully with ${wallet.balance} Tk wallet.`);
         console.log({ user, wallet });
     }
     catch (error) {

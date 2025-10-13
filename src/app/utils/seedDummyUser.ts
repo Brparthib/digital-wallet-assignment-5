@@ -29,7 +29,7 @@ export const seedDummyUser = async () => {
     };
 
     const payload: IUser = {
-      name: "Dummy User",
+      name: "User",
       phone: envVars.USER_PHONE,
       password: hashedPassword,
       role: Role.USER,
@@ -45,7 +45,7 @@ export const seedDummyUser = async () => {
       balance: Number(envVars.MINIMUM_BALANCE),
     });
 
-    console.log(`Dummy User created successfully with ${wallet.balance} Tk wallet.`);
+    console.log(`User created successfully with ${wallet.balance} Tk wallet.`);
     console.log({ user, wallet });
   } catch (error: any) {
     console.log(error);

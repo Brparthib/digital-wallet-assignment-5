@@ -36,7 +36,7 @@ const seedDummyAgent = () => __awaiter(void 0, void 0, void 0, function* () {
             providerId: envCon_1.envVars.AGENT_PHONE,
         };
         const payload = {
-            name: "Dummy User",
+            name: "Agent",
             phone: envCon_1.envVars.AGENT_PHONE,
             password: hashedPassword,
             role: user_interface_1.Role.AGENT,
@@ -50,7 +50,7 @@ const seedDummyAgent = () => __awaiter(void 0, void 0, void 0, function* () {
             phone: agent.phone,
             balance: Number(envCon_1.envVars.MINIMUM_BALANCE),
         });
-        console.log(`Dummy Agent created successfully with ${wallet.balance} Tk wallet.`);
+        console.log(`Agent created successfully with ${wallet.balance} Tk wallet.`);
         console.log({ agent, wallet });
     }
     catch (error) {

@@ -34,7 +34,7 @@ export const seedDummyAgent = async () => {
     };
 
     const payload: IUser = {
-      name: "Dummy User",
+      name: "Agent",
       phone: envVars.AGENT_PHONE,
       password: hashedPassword,
       role: Role.AGENT,
@@ -52,7 +52,7 @@ export const seedDummyAgent = async () => {
     });
 
     console.log(
-      `Dummy Agent created successfully with ${wallet.balance} Tk wallet.`
+      `Agent created successfully with ${wallet.balance} Tk wallet.`
     );
     console.log({ agent, wallet });
   } catch (error: any) {
