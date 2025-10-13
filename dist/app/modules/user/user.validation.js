@@ -60,11 +60,13 @@ exports.updateUserZodSchema = zod_1.default.object({
         .max(100, { message: "Email cannot exceed 10 characters." })
         .optional(),
     role: zod_1.default.string({ error: "Role must be string" }).optional(),
+    isDeleted: zod_1.default.boolean({ error: "isDeleted Must be boolean" }).optional(),
     address: zod_1.default
         .string({ error: "Address must be string." })
         .max(200, { message: "Address cannot exceed 200 characters." })
         .optional(),
-    status: zod_1.default.string().optional(),
-    approval: zod_1.default.string().optional(),
-    claimRole: zod_1.default.string().optional(),
+    status: zod_1.default.string({ error: "Status must be string." }).optional(),
+    approval: zod_1.default.string({ error: "Approval must be string." }).optional(),
+    claimRole: zod_1.default.string({ error: "Claim role must be string." }).optional(),
+    feedback: zod_1.default.boolean({ error: "feedback Must be boolean" }).optional(),
 });

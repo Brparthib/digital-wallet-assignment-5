@@ -38,5 +38,9 @@ const userSchema = new mongoose_1.Schema({
     claimRole: {
         type: String,
     },
+    feedback: {
+        type: Boolean,
+        default: false,
+    },
 }, { timestamps: true, versionKey: false });
 exports.User = (0, mongoose_1.model)("User", userSchema);

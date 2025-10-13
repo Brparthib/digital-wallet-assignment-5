@@ -47,6 +47,10 @@ const userSchema = new Schema<IUser>(
     claimRole: {
       type: String,
     },
+    feedback: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true, versionKey: false }
 );

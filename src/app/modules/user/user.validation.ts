@@ -58,11 +58,13 @@ export const updateUserZodSchema = z.object({
     .max(100, { message: "Email cannot exceed 10 characters." })
     .optional(),
   role: z.string({ error: "Role must be string" }).optional(),
+  isDeleted: z.boolean({ error: "isDeleted Must be boolean" }).optional(),
   address: z
     .string({ error: "Address must be string." })
     .max(200, { message: "Address cannot exceed 200 characters." })
     .optional(),
-  status: z.string().optional(),
-  approval: z.string().optional(),
-  claimRole: z.string().optional(),
+  status: z.string({ error: "Status must be string." }).optional(),
+  approval: z.string({ error: "Approval must be string." }).optional(),
+  claimRole: z.string({ error: "Claim role must be string." }).optional(),
+  feedback: z.boolean({ error: "feedback Must be boolean" }).optional(),
 });

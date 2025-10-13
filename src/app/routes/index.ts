@@ -4,6 +4,7 @@ import { walletRoutes } from "../modules/wallet/wallet.route";
 import { authRoutes } from "../modules/auth/auth.route";
 import { transactionRoutes } from "../modules/transaction/transaction.route";
 import { statsRoutes } from "../modules/stats/stats.route";
+import { feedbackRoutes } from "../modules/feedback/feedback.route";
 
 export const router = Router();
 
@@ -27,6 +28,10 @@ const moduleRoutes = [
   {
     path: "/stats",
     route: statsRoutes,
+  },
+  {
+    path: "/feedback",
+    route: feedbackRoutes,
   },
 ];
 
